@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Badminton Stats - Présences</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --ok-bg: #ecfdf5;
+      --ok-line: #a7f3d0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .session-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font: inherit;
+      background: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 14px;
+    }
+
+    .players-list-title {
+      margin: 18px 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .players-list-sub {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .players-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .player-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fafafa;
+      width: 100%;
+      min-height: 68px;
+    }
+
+    .player-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    .player-text {
+      min-width: 0;
+    }
+
+    .player-name {
+      font-weight: bold;
+    }
+
+    .player-code {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .summary-box {
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-line);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+    }
+
+    .summary-value {
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .note {
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .session-box {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Présences du jour</h1>
+        <p>Cocher les joueurs présents pour la session en cours.</p>
+      </div>
+      <a class="btn secondary" href="index.html">← Retour à l'accueil</a>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <h2>Session du jour</h2>
+        <p>Prépare la session active, puis coche simplement les joueurs présents.</p>
+
+<div class="session-box">
+  <div class="field full">
+    <label for="sessionSeason">Saison</label>
+    <select id="sessionSeason" name="sessionSeason">
+      <option value="">Choisir une saison</option>
+    </select>
+  </div>
+
+  <div class="field full">
+    <label for="sessionPicker">Session</label>
+    <select id="sessionPicker" name="sessionPicker">
+      <option value="">Choisir une session</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="sessionDate">Date de la session</label>
+    <input type="date" id="sessionDate" name="sessionDate" readonly />
+  </div>
+
+  <div class="field">
+    <label for="sessionNumber">No de session</label>
+    <input type="number" id="sessionNumber" name="sessionNumber" min="1" readonly />
+  </div>
+</div>
+        <div class="toolbar">
+          <button type="button" class="btn secondary" id="checkAllPlayers">Tout cocher</button>
+          <button type="button" class="btn secondary" id="uncheckAllPlayers">Tout décocher</button>
+        </div>
+
+        <div class="players-list-title">Joueurs de la saison</div>
+        <p class="players-list-sub">
+          Seuls les joueurs inscrits à la saison sélectionnée apparaissent ici.
+          Coche simplement ceux qui sont présents aujourd’hui.
+        </p>
+
+        <div class="players-list" id="playersList">
+          <div class="player-item">
+            <div class="player-text">
+              <div class="player-name">Chargement des joueurs...</div>
+              <div class="player-code">Connexion à la base en cours</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn" id="saveAttendanceBtn">Enregistrer les présences</button>
+          <button type="button" class="btn secondary" id="resetAttendanceBtn">Réinitialiser</button>
+        </div>
+
+        <div class="note">
+          Enregistrer remplace complètement les présences déjà sauvegardées pour cette session. Tu peux donc corriger une erreur sans créer de doublon.
+        </div>
+      </section>
+
+      <aside class="card">
+        <h2>Résumé</h2>
+        <p>Ce panneau pourra être mis à jour automatiquement quand on branchera le JavaScript.</p>
+
+<div class="summary-box">
+  <h3>Session en préparation</h3>
+
+  <div class="summary-row">
+    <div class="summary-label">Saison</div>
+    <div class="summary-value" id="sumSeason">—</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">Date</div>
+    <div class="summary-value" id="sumDate">—</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">No session</div>
+    <div class="summary-value" id="sumSessionNo">—</div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-label">Présents cochés</div>
+    <div class="summary-value" id="selectedCount">0</div>
+  </div>
+</div>
+
+<h2 style="margin-top: 18px;">Fonctionnement</h2>
+<p>
+  La liste provient du roster de la saison sélectionnée. Une sauvegarde remplace les présences de la session choisie, ce qui permet de corriger les absences au besoin.
+</p>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwddJ7s8j6uWH2fXP_h7161F_MT5ZU12X15oMx6Xx7icxud1jg9_e3iq28bjfs3X4_y/exec';
+
+const playersListEl = document.getElementById('playersList');
+const checkAllBtn = document.getElementById('checkAllPlayers');
+const uncheckAllBtn = document.getElementById('uncheckAllPlayers');
+const selectedCountEl = document.getElementById('selectedCount');
+const sessionDateEl = document.getElementById('sessionDate');
+const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+const sessionNumberEl = document.getElementById('sessionNumber');
+const sessionSeasonEl = document.getElementById('sessionSeason');
+const sessionPickerEl = document.getElementById('sessionPicker');
+
+let seasonsCache = [];
+let allPlayersCache = [];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function updateSelectedCount() {
+      const checked = document.querySelectorAll('input[name="attendanceSelection"]:checked').length;
+      selectedCountEl.textContent = checked;
+    }
+
+function updateRosterCheckboxEvents() {
+  document
+    .querySelectorAll('input[name="attendanceSelection"]')
+    .forEach(box => {
+      box.addEventListener('change', updateSelectedCount);
+    });
+}
+
+function getSeasonRosterIds(season) {
+  if (!season || !Array.isArray(season.joueurs)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      season.joueurs
+        .map(value => String(value || '').trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function renderPlayersForSelectedSeason() {
+  const season = getSelectedSeason();
+
+  if (!season) {
+    playersListEl.innerHTML = `
+      <div class="player-item">
+        <div class="player-text">
+          <div class="player-name">Choisis une saison</div>
+          <div class="player-code">La liste des joueurs apparaîtra ensuite.</div>
+        </div>
+      </div>
+    `;
+    updateSelectedCount();
+    return;
+  }
+
+  const rosterIds = getSeasonRosterIds(season);
+  const rosterSet = new Set(rosterIds);
+
+  const players = allPlayersCache
+    .filter(player =>
+      rosterSet.has(String(player.joueur_id || player.player_id || '').trim())
+    )
+    .sort((a, b) =>
+      String(a.nom || '').localeCompare(String(b.nom || ''), 'fr', {
+        sensitivity: 'base'
+      })
+    );
+
+  if (!players.length) {
+    playersListEl.innerHTML = `
+      <div class="player-item">
+        <div class="player-text">
+          <div class="player-name">Aucun joueur dans cette saison</div>
+          <div class="player-code">Ajoute des joueurs depuis Gestion des saisons.</div>
+        </div>
+      </div>
+    `;
+    updateSelectedCount();
+    return;
+  }
+
+  playersListEl.innerHTML = players.map(player => {
+    const playerId = escapeHtml(player.joueur_id || player.player_id || '');
+    const playerName = escapeHtml(player.nom || 'Sans nom');
+
+    return `
+      <label class="player-item">
+        <input
+          type="checkbox"
+          name="attendanceSelection"
+          value="${playerId}"
+        />
+        <div class="player-text">
+          <div class="player-name">${playerName}</div>
+          <div class="player-code">${playerId}</div>
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  updateRosterCheckboxEvents();
+  updateSelectedCount();
+}
+
+function buildAttendancePayload() {
+  const selectedPlayers = Array.from(
+    document.querySelectorAll('input[name="attendanceSelection"]:checked')
+  ).map(box => box.value);
+
+  const selectedOption = sessionPickerEl.options[sessionPickerEl.selectedIndex];
+
+  return {
+    date_session: selectedOption?.dataset.date || '',
+    no_session: sessionPickerEl.value || '',
+    saison_id: sessionSeasonEl.value || '',
+    joueurs_presents: selectedPlayers
+  };
+}
+
+function getSelectedSeason() {
+  const saisonId = String(sessionSeasonEl.value || '').trim();
+  return seasonsCache.find(s => String(s.saison_id || '').trim() === saisonId) || null;
+}
+
+function clearSessionFields() {
+  sessionPickerEl.innerHTML = '<option value="">Choisir une session</option>';
+  sessionDateEl.value = '';
+  sessionNumberEl.value = '';
+}
+
+function syncSelectedSession() {
+  const option = sessionPickerEl.options[sessionPickerEl.selectedIndex];
+
+  if (!option || !option.value) {
+    sessionDateEl.value = '';
+    sessionNumberEl.value = '';
+    return;
+  }
+
+  sessionDateEl.value = option.dataset.date || '';
+  sessionNumberEl.value = option.value || '';
+}
+
+function populateSessions() {
+  clearSessionFields();
+
+  const season = getSelectedSeason();
+  if (!season) {
+    return;
+  }
+
+  const sessions = Array.isArray(season.sessions) ? season.sessions : [];
+
+  sessions.forEach(session => {
+    const noSession = String(session.no_session || '').trim();
+    const dateSession = String(session.date || '').trim();
+
+    if (!noSession || !dateSession) return;
+
+    const option = document.createElement('option');
+    option.value = noSession;
+    option.textContent = `Session ${noSession} — ${dateSession}`;
+    option.dataset.date = dateSession;
+    sessionPickerEl.appendChild(option);
+  });
+
+  sessionPickerEl.value = '';
+  syncSelectedSession();
+}
+
+async function loadExistingAttendance() {
+  const saisonId = String(sessionSeasonEl.value || '').trim();
+  const noSession = String(sessionPickerEl.value || '').trim();
+  const dateSession = String(sessionDateEl.value || '').trim();
+
+  if (!saisonId || !noSession || !dateSession) {
+    document.querySelectorAll('input[name="attendanceSelection"]').forEach(box => {
+      box.checked = false;
+    });
+    updateSelectedCount();
+    return;
+  }
+
+  try {
+    const url =
+      `${API_URL}?action=getAttendanceForSession` +
+      `&saison_id=${encodeURIComponent(saisonId)}` +
+      `&date_session=${encodeURIComponent(dateSession)}` +
+      `&no_session=${encodeURIComponent(noSession)}`;
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    const presentIds = new Set(
+      Array.isArray(result.joueurs)
+        ? result.joueurs.map(j => String(j.joueur_id || '').trim())
+        : []
+    );
+
+    document.querySelectorAll('input[name="attendanceSelection"]').forEach(box => {
+      box.checked = presentIds.has(String(box.value || '').trim());
+    });
+
+    updateSelectedCount();
+  } catch (error) {
+    console.error('Erreur loadExistingAttendance:', error);
+  }
+}
+    
+async function loadPlayers() {
+  try {
+    const response = await fetch(`${API_URL}?action=getPlayers&includeInactive=1`);
+    const result = await response.json();
+
+    if (!result.ok || !Array.isArray(result.data)) {
+      throw new Error(result.error || 'Réponse API invalide');
+    }
+
+    allPlayersCache = result.data;
+    renderPlayersForSelectedSeason();
+  } catch (error) {
+    console.error('Erreur loadPlayers:', error);
+    allPlayersCache = [];
+
+    playersListEl.innerHTML = `
+      <div class="player-item">
+        <div class="player-text">
+          <div class="player-name">Erreur de chargement</div>
+          <div class="player-code">${escapeHtml(error.message || error)}</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+    if (sessionDateEl) {
+      sessionDateEl.value = new Date().toISOString().split('T')[0];
+    }
+checkAllBtn.addEventListener('click', () => {
+  document
+    .querySelectorAll('input[name="attendanceSelection"]')
+    .forEach(box => {
+      box.checked = true;
+    });
+
+  updateSelectedCount();
+});
+
+uncheckAllBtn.addEventListener('click', () => {
+  document
+    .querySelectorAll('input[name="attendanceSelection"]')
+    .forEach(box => {
+      box.checked = false;
+    });
+
+  updateSelectedCount();
+});
+
+sessionSeasonEl.addEventListener('change', async () => {
+  populateSessions();
+  renderPlayersForSelectedSeason();
+  await loadExistingAttendance();
+});
+
+sessionPickerEl.addEventListener('change', async () => {
+  syncSelectedSession();
+  await loadExistingAttendance();
+});
+
+(async () => {
+  await loadSeasons();
+  await loadPlayers();
+  renderPlayersForSelectedSeason();
+  await loadExistingAttendance();
+})();
+
+    
+saveAttendanceBtn.addEventListener('click', async () => {
+  const payload = buildAttendancePayload();
+
+  if (!sessionPickerEl.value) {
+  alert('Choisis explicitement la session avant d’enregistrer.');
+  return;
+}
+
+const seasonLabel =
+  sessionSeasonEl.options[sessionSeasonEl.selectedIndex]?.text || payload.saison_id;
+
+const confirmSave = confirm(
+  `Tu vas enregistrer les présences pour :\n\n` +
+  `Saison : ${seasonLabel}\n` +
+  `Session : ${payload.no_session}\n` +
+  `Date : ${payload.date_session}\n\n` +
+  `Continuer ?`
+);
+
+if (!confirmSave) {
+  return;
+}
+
+  if (!payload.date_session) {
+    alert('Choisis une date de session.');
+    return;
+  }
+
+  if (!payload.no_session) {
+    alert('Entre le numéro de session.');
+    return;
+  }
+
+  if (!payload.saison_id) {
+    alert('Choisis une saison.');
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: 'saveAttendance',
+        ...payload
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    alert(`Présences sauvegardées : ${result.nb_presents}`);
+    console.log('Résultat saveAttendance :', result);
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors de la sauvegarde : ' + (error.message || error));
+  }
+});
+
+async function loadSeasons() {
+  try {
+    const response = await fetch(`${API_URL}?action=getSeasons`);
+    const raw = await response.text();
+
+    console.log('status getSeasons =', response.status);
+    console.log('body getSeasons =', raw);
+
+    const result = JSON.parse(raw);
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    seasonsCache = Array.isArray(result.data) ? result.data : [];
+
+    sessionSeasonEl.innerHTML = '<option value="">Choisir une saison</option>';
+
+    seasonsCache.forEach(season => {
+      const option = document.createElement('option');
+      option.value = season.saison_id;
+
+      const status = String(season.statut || '').trim().toLowerCase();
+      const isClosed = status === 'terminee' || status === 'terminée';
+
+      option.textContent =
+        (season.nom_saison || season.saison_id) +
+        (isClosed ? ' — terminée' : '');
+
+      option.disabled = isClosed;
+
+      sessionSeasonEl.appendChild(option);
+    });
+
+    if (seasonsCache.length > 0) {
+      const activeSeason =
+        seasonsCache.find(season =>
+          String(season.statut || '').trim().toLowerCase() === 'active'
+        ) || seasonsCache[0];
+
+      sessionSeasonEl.value = activeSeason.saison_id;
+      populateSessions();
+      renderPlayersForSelectedSeason();
+    } else {
+      clearSessionFields();
+      renderPlayersForSelectedSeason();
+    }
+  } catch (error) {
+    console.error('Erreur loadSeasons:', error);
+    clearSessionFields();
+  }
+}
+    
+  </script>
+</body>
+</html>
