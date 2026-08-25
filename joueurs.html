@@ -1,0 +1,1067 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joueurs • Club de badminton</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --soft: #eff6ff;
+      --soft-line: #bfdbfe;
+      --danger: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  color: var(--text);
+  font-weight: bold;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 0;
+}
+
+.btn.home-link {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btn.home-link:hover {
+  background: #eff6ff;
+}
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .panel-intro {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .players-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 70vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .player-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+    }
+
+    .player-item:hover {
+      transform: translateY(-1px);
+      border-color: #c7d2fe;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .player-item.active {
+      border-color: var(--accent);
+      background: #f8fbff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    }
+
+    .avatar-sm,
+    .avatar-lg {
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e5e7eb;
+      border: 1px solid var(--line);
+    }
+
+    .avatar-sm {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+    }
+
+    .avatar-lg {
+      width: 140px;
+      height: 140px;
+      display: block;
+      margin: 0 auto 16px;
+    }
+
+    .player-meta {
+      min-width: 0;
+    }
+
+    .player-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .player-id {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .empty-box {
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      background: #fafafa;
+    }
+
+    .detail-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .back-btn {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .back-btn:hover {
+      background: #f8fafc;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
+.field-photo-drive {
+  display: none;
+}
+    .photo-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status {
+      margin-top: 14px;
+      min-height: 20px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.ok {
+      color: #166534;
+    }
+
+    .save-row {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stats-section {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stats-title-wrap h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .stats-title-wrap p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .stats-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--soft-line);
+      background: var(--soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fbfdff;
+    }
+
+    .stat-card h4 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #e5e7eb;
+    }
+
+    .stat-row:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .stat-value.text {
+      font-size: 14px;
+      white-space: normal;
+      max-width: 58%;
+      line-height: 1.35;
+    }
+
+
+    .btn.save-disabled {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 920px) {
+      .page-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .players-list {
+        max-height: none;
+      }
+
+      .detail-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-value.text {
+        max-width: 62%;
+      }
+hero {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hero-actions {
+  justify-content: flex-start;
+}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+<section class="hero">
+  <h1>Joueurs</h1>
+
+  <div class="hero-actions">
+    <a class="btn home-link" href="index.html">← Retour à l’accueil</a>
+  </div>
+</section>
+
+    <section class="page-grid">
+      <aside class="panel">
+        <h2>Liste des joueurs</h2>
+        <p class="panel-intro">
+          Clique sur un joueur pour ouvrir sa fiche.
+        </p>
+
+        <input
+          id="playerSearch"
+          class="search-box"
+          type="text"
+          placeholder="Rechercher un joueur..."
+        />
+
+        <div id="playersList" class="players-list">
+          <div class="empty-box">Chargement des joueurs...</div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div id="playerDetailEmpty" class="empty-box">
+          Choisis un joueur dans la liste pour afficher sa fiche.
+        </div>
+
+        <div id="playerDetailCard" style="display:none;">
+          <div class="detail-top">
+            <h2 style="margin:0;">Fiche du joueur</h2>
+            <button id="backToListBtn" class="btn back-btn" type="button">Retour à la liste</button>
+          </div>
+
+          <img id="playerPhotoPreview" class="avatar-lg" src="" alt="Photo du joueur" />
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="playerId">ID joueur</label>
+              <input id="playerId" type="text" readonly />
+            </div>
+
+            <div class="field">
+              <label for="playerName">Nom</label>
+              <input id="playerName" type="text" />
+            </div>
+
+            <div class="field field-photo-drive">
+  <label for="playerPhotoDrive">Photo Drive ID</label>
+  <input id="playerPhotoDrive" type="text" placeholder="FILE_ID Google Drive" />
+</div>
+
+            <div class="field">
+              <label for="playerPhotoFile">Photo depuis l’appareil</label>
+              <div class="photo-actions">
+                <input
+                  id="playerPhotoFile"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                />
+                <div class="hint">
+                  Sur mobile, ce champ peut proposer directement la caméra ou la galerie.
+                  Pour cette première étape, l’image choisie sert d’aperçu local.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="save-row">
+            <button id="savePlayerBtn" class="btn primary" type="button">Sauvegarder</button>
+          </div>
+
+          <div id="playerStatus" class="status">
+            La sauvegarde serveur sera branchée à l’étape suivante.
+          </div>
+
+          <section class="stats-section" aria-label="Statistiques du joueur">
+            <div class="stats-header">
+              <div class="stats-title-wrap">
+                <h3>Statistiques du joueur</h3>
+                <p id="statsIntroText">
+                  Les statistiques se chargent automatiquement quand tu ouvres la fiche d’un joueur.
+                </p>
+              </div>
+              <div id="statsBadge" class="stats-badge">Prêt à charger</div>
+            </div>
+
+            <div class="stats-grid">
+              <article class="stat-card">
+                <h4>Bilan</h4>
+                <div class="stat-list">
+                  <div class="stat-row">
+                    <div class="stat-label">Victoires saison</div>
+                    <div id="statSeasonWins" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Matchs joués saison</div>
+                    <div id="statSeasonMatches" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Victoires global</div>
+                    <div id="statGlobalWins" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Taux de victoire</div>
+                    <div id="statWinRate" class="stat-value">—</div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="stat-card">
+                <h4>Points • saison</h4>
+                <div class="stat-list">
+                  <div class="stat-row">
+                    <div class="stat-label">Points pour</div>
+                    <div id="statPointsFor" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Points contre</div>
+                    <div id="statPointsAgainst" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Différentiel</div>
+                    <div id="statPointDiff" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Matchs joués</div>
+                    <div id="statBiggestGap" class="stat-value">—</div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="stat-card">
+                <h4>Duos et rivalités</h4>
+                <div class="stat-list">
+                  <div class="stat-row">
+                    <div class="stat-label">Partenaire le plus gagnant</div>
+                    <div id="statBestPartner" class="stat-value text">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Partenaire le plus fréquent</div>
+                    <div id="statMostFrequentPartner" class="stat-value text">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Bête noire</div>
+                    <div id="statNemesis" class="stat-value text">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Adversaire le plus joué</div>
+                    <div id="statMostPlayedOpponent" class="stat-value text">—</div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="stat-card">
+                <h4>Records express</h4>
+                <div class="stat-list">
+                  <div class="stat-row">
+                    <div class="stat-label">Plus grosse victoire</div>
+                    <div id="statBiggestWin" class="stat-value text">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Défaite la plus serrée</div>
+                    <div id="statClosestLoss" class="stat-value text">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Meilleure série</div>
+                    <div id="statBestStreak" class="stat-value">—</div>
+                  </div>
+                  <div class="stat-row">
+                    <div class="stat-label">Terrain favori</div>
+                    <div id="statFavoriteCourt" class="stat-value text">—</div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbwddJ7s8j6uWH2fXP_h7161F_MT5ZU12X15oMx6Xx7icxud1jg9_e3iq28bjfs3X4_y/exec';
+
+    const DEFAULT_AVATAR =
+      'data:image/svg+xml;utf8,' +
+      encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+          <rect width="200" height="200" fill="#e5e7eb"/>
+          <circle cx="100" cy="78" r="34" fill="#9ca3af"/>
+          <path d="M40 170c10-30 34-46 60-46s50 16 60 46" fill="#9ca3af"/>
+        </svg>
+      `);
+
+    let allPlayers = [];
+    let filteredPlayers = [];
+    let selectedPlayerId = '';
+
+    function safeText(value) {
+      return value == null ? '' : String(value);
+    }
+
+    function getPlayerPhoto(player) {
+      const fileId = safeText(player && player.photo_drive).trim();
+      return fileId
+      ? ('https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w300')
+      : DEFAULT_AVATAR;
+    }
+
+    function findPlayerById(playerId) {
+      return allPlayers.find(player => safeText(player.joueur_id).trim() === safeText(playerId).trim()) || null;
+    }
+
+    function prioritizeSelectedPlayer(players) {
+      const selectedId = safeText(selectedPlayerId).trim();
+      if (!selectedId) return players.slice();
+
+      const selected = [];
+      const others = [];
+
+      players.forEach(player => {
+        if (safeText(player.joueur_id).trim() === selectedId) {
+          selected.push(player);
+        } else {
+          others.push(player);
+        }
+      });
+
+      return [...selected, ...others];
+    }
+
+    function renderPlayersList(players) {
+      const list = document.getElementById('playersList');
+
+      if (!players.length) {
+        list.innerHTML = '<div class="empty-box">Aucun joueur trouvé.</div>';
+        return;
+      }
+
+      const orderedPlayers = prioritizeSelectedPlayer(players);
+
+      list.innerHTML = orderedPlayers.map(player => {
+        const isActive = safeText(player.joueur_id) === selectedPlayerId;
+        return `
+          <button
+            type="button"
+            class="player-item${isActive ? ' active' : ''}"
+            data-player-id="${safeText(player.joueur_id)}"
+            style="text-align:left;background:none;"
+          >
+            <img class="avatar-sm" src="${getPlayerPhoto(player)}" alt="${safeText(player.nom)}">
+            <div class="player-meta">
+              <div class="player-name">${safeText(player.nom) || '(Sans nom)'}</div>
+              <div class="player-id">${safeText(player.joueur_id)}</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      list.querySelectorAll('[data-player-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openPlayer(btn.getAttribute('data-player-id'));
+        });
+      });
+    }
+
+    function showPlayerCard(show) {
+      document.getElementById('playerDetailEmpty').style.display = show ? 'none' : 'block';
+      document.getElementById('playerDetailCard').style.display = show ? 'block' : 'none';
+    }
+
+    let statsRequestSeq = 0;
+
+    function setStatValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value == null || value === '' ? '—' : String(value);
+    }
+
+    function resetPlayerStats(message, badgeText) {
+      setStatValue('statSeasonWins', '—');
+      setStatValue('statSeasonMatches', '—');
+      setStatValue('statGlobalWins', '—');
+      setStatValue('statWinRate', '—');
+      setStatValue('statPointsFor', '—');
+      setStatValue('statPointsAgainst', '—');
+      setStatValue('statPointDiff', '—');
+      setStatValue('statBiggestGap', '—');
+      setStatValue('statBestPartner', '—');
+      setStatValue('statMostFrequentPartner', '—');
+      setStatValue('statNemesis', '—');
+      setStatValue('statMostPlayedOpponent', '—');
+      setStatValue('statBiggestWin', '—');
+      setStatValue('statClosestLoss', '—');
+      setStatValue('statBestStreak', '—');
+      setStatValue('statFavoriteCourt', '—');
+
+      const intro = document.getElementById('statsIntroText');
+      const badge = document.getElementById('statsBadge');
+
+      if (intro) {
+        intro.textContent = message || 'Les statistiques se chargent automatiquement quand tu ouvres la fiche d’un joueur.';
+      }
+
+      if (badge) {
+        badge.textContent = badgeText || 'Prêt à charger';
+      }
+    }
+
+    function formatPercent(value) {
+      const num = Number(value || 0);
+      return Number.isFinite(num) ? (Math.round(num * 10) / 10).toFixed(1) + ' %' : '—';
+    }
+
+    function formatSigned(value) {
+      const num = Number(value || 0);
+      if (!Number.isFinite(num)) return '—';
+      return (num > 0 ? '+' : '') + String(num);
+    }
+
+    function pickStat(source, keys) {
+      if (!source || typeof source !== 'object') return null;
+
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          const value = source[key];
+          if (value !== null && value !== undefined && value !== '') {
+            return value;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function getSeasonPointsSummary(season, global) {
+      const pointsFor = pickStat(season, ['pointsFor', 'points_pour', 'pf', 'points_for']);
+      const pointsAgainst = pickStat(season, ['pointsAgainst', 'points_contre', 'pc', 'points_against']);
+      const pointDiff = pickStat(season, ['pointDiff', 'plus_moins', 'differentiel', 'diff']);
+      const matches = pickStat(season, ['matches', 'matchs', 'matchs_joues']);
+
+      return {
+        pointsFor: pointsFor ?? global.pointsFor ?? 0,
+        pointsAgainst: pointsAgainst ?? global.pointsAgainst ?? 0,
+        pointDiff: pointDiff ?? global.pointDiff ?? 0,
+        matches: matches ?? global.matches ?? 0
+      };
+    }
+
+    function formatPartnerStat(item, primaryKey, suffix) {
+      if (!item || !item.name) return '—';
+      const primaryValue = Number(item[primaryKey] || 0);
+      const matches = Number(item.matches || 0);
+      const winRate = Number(item.winRate || 0);
+      const extra = [];
+      if (Number.isFinite(primaryValue) && primaryValue > 0) {
+        extra.push(primaryValue + ' ' + suffix);
+      }
+      if (matches > 0) {
+        extra.push(matches + ' matchs');
+      }
+      if (winRate > 0) {
+        extra.push((Math.round(winRate * 10) / 10).toFixed(1) + ' %');
+      }
+      return extra.length ? item.name + ' (' + extra.join(' • ') + ')' : item.name;
+    }
+
+    function formatOpponentStat(item, primaryKey, suffix) {
+      if (!item || !item.name) return '—';
+      const primaryValue = Number(item[primaryKey] || 0);
+      const matches = Number(item.matches || 0);
+      const extra = [];
+      if (Number.isFinite(primaryValue) && primaryValue > 0) {
+        extra.push(primaryValue + ' ' + suffix);
+      }
+      if (matches > 0) {
+        extra.push(matches + ' matchs');
+      }
+      return extra.length ? item.name + ' (' + extra.join(' • ') + ')' : item.name;
+    }
+
+    function formatRecord(record, isLoss) {
+      if (!record) return '—';
+      const scoreFor = Number(record.scoreFor || 0);
+      const scoreAgainst = Number(record.scoreAgainst || 0);
+      const diffValue = Number(record.diff || 0);
+      const diffAbs = Math.abs(diffValue);
+      const prefix = Number.isFinite(scoreFor) && Number.isFinite(scoreAgainst)
+        ? (scoreFor + '-' + scoreAgainst)
+        : '—';
+      const bits = [];
+      if (diffAbs > 0) {
+        bits.push((isLoss ? '-' : '+') + diffAbs);
+      }
+      if (record.sessionNo) {
+        bits.push('session ' + record.sessionNo);
+      }
+      if (record.courtNo) {
+        bits.push('terrain ' + record.courtNo);
+      }
+      return bits.length ? prefix + ' (' + bits.join(' • ') + ')' : prefix;
+    }
+
+    function formatFavoriteCourt(court) {
+      if (!court || !court.courtNo) return '—';
+      const matches = Number(court.matches || 0);
+      const wins = Number(court.wins || 0);
+      const extras = [];
+      if (matches > 0) extras.push(matches + ' matchs');
+      if (wins > 0) extras.push(wins + ' victoires');
+      return extras.length
+        ? ('Terrain ' + court.courtNo + ' (' + extras.join(' • ') + ')')
+        : ('Terrain ' + court.courtNo);
+    }
+
+    async function loadPlayerStats(playerId) {
+      const requestId = ++statsRequestSeq;
+      resetPlayerStats('Chargement des statistiques du joueur...', 'Chargement');
+
+      try {
+        const response = await fetch(
+          API_BASE + '?action=getPlayerStats&joueur_id=' + encodeURIComponent(playerId)
+        );
+        const data = await response.json();
+
+        if (requestId !== statsRequestSeq) return;
+
+        if (!data || !data.ok || !data.stats) {
+          throw new Error((data && data.error) || 'Réponse getPlayerStats invalide.');
+        }
+
+        const stats = data.stats;
+        const season = stats.season || {};
+        const global = stats.global || {};
+        const relations = stats.relationships || {};
+        const records = stats.records || {};
+        const seasonPoints = getSeasonPointsSummary(season, global);
+
+        setStatValue('statSeasonWins', season.wins ?? 0);
+        setStatValue('statSeasonMatches', season.matches ?? 0);
+        setStatValue('statGlobalWins', global.wins ?? 0);
+        setStatValue('statWinRate', formatPercent(global.winRate ?? 0));
+        setStatValue('statPointsFor', seasonPoints.pointsFor);
+        setStatValue('statPointsAgainst', seasonPoints.pointsAgainst);
+        setStatValue('statPointDiff', formatSigned(seasonPoints.pointDiff));
+        setStatValue('statBiggestGap', seasonPoints.matches);
+        setStatValue('statBestPartner', formatPartnerStat(relations.bestPartner, 'wins', 'victoires'));
+        setStatValue('statMostFrequentPartner', formatPartnerStat(relations.mostFrequentPartner, 'matches', 'matchs'));
+        setStatValue('statNemesis', formatOpponentStat(relations.nemesis, 'losses', 'défaites'));
+        setStatValue('statMostPlayedOpponent', formatOpponentStat(relations.mostPlayedOpponent, 'matches', 'matchs'));
+        setStatValue('statBiggestWin', formatRecord(records.biggestWin, false));
+        setStatValue('statClosestLoss', formatRecord(records.closestLoss, true));
+        setStatValue('statBestStreak', records.bestWinStreak != null ? (records.bestWinStreak + ' victoires') : '—');
+        setStatValue('statFavoriteCourt', formatFavoriteCourt(records.favoriteCourt));
+
+        const intro = document.getElementById('statsIntroText');
+        const badge = document.getElementById('statsBadge');
+
+        if (intro) {
+          const seasonName = safeText(stats.seasonName).trim();
+          const globalMatches = Number(global.matches || 0);
+          const presenceCount = Number(season.presences || 0);
+          intro.textContent = seasonName
+            ? (seasonName + ' • ' + globalMatches + ' matchs analysés au total • ' + presenceCount + ' présences cette saison')
+            : (globalMatches + ' matchs analysés au total');
+        }
+
+        if (badge) {
+          badge.textContent = stats.seasonName ? ('Saison active • ' + stats.seasonName) : 'Stats à jour';
+        }
+      } catch (error) {
+        console.error(error);
+        if (requestId !== statsRequestSeq) return;
+        resetPlayerStats('Impossible de charger les statistiques pour le moment.', 'Indisponible');
+      }
+    }
+
+    function openPlayer(playerId) {
+      const player = findPlayerById(playerId);
+      if (!player) return;
+
+      selectedPlayerId = safeText(player.joueur_id);
+      showPlayerCard(true);
+
+      document.getElementById('playerId').value = safeText(player.joueur_id);
+      document.getElementById('playerName').value = safeText(player.nom);
+      document.getElementById('playerPhotoDrive').value = safeText(player.photo_drive);
+      document.getElementById('playerPhotoFile').value = '';
+      document.getElementById('playerStatus').textContent = 'Modification locale prête. Sauvegarde serveur à brancher ensuite.';
+      document.getElementById('playerStatus').className = 'status';
+
+      refreshPhotoPreview();
+      renderPlayersList(filteredPlayers);
+      document.getElementById('playersList').scrollTop = 0;
+      loadPlayerStats(selectedPlayerId);
+    }
+
+    function closePlayer() {
+      selectedPlayerId = '';
+      showPlayerCard(false);
+      resetPlayerStats('Les statistiques se chargent automatiquement quand tu ouvres la fiche d’un joueur.', 'Prêt à charger');
+      renderPlayersList(filteredPlayers);
+    }
+
+function refreshPhotoPreview() {
+  const fileInput = document.getElementById('playerPhotoFile');
+  const driveInput = document.getElementById('playerPhotoDrive');
+  const preview = document.getElementById('playerPhotoPreview');
+
+  const file = fileInput.files && fileInput.files[0];
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+    return;
+  }
+
+  const fileId = safeText(driveInput.value).trim();
+  preview.src = fileId
+    ? ('https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w300')
+    : DEFAULT_AVATAR;
+}
+
+    function filterPlayers() {
+      const term = safeText(document.getElementById('playerSearch').value).trim().toLowerCase();
+
+      filteredPlayers = allPlayers.filter(player => {
+        const nom = safeText(player.nom).toLowerCase();
+        const id = safeText(player.joueur_id).toLowerCase();
+        return !term || nom.includes(term) || id.includes(term);
+      });
+
+      renderPlayersList(filteredPlayers);
+    }
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
+
+    reader.readAsDataURL(file);
+  });
+}
+    
+async function savePlayer() {
+  const joueurId = safeText(document.getElementById('playerId').value).trim();
+  const nom = safeText(document.getElementById('playerName').value).trim();
+  const photoDrive = safeText(document.getElementById('playerPhotoDrive').value).trim();
+  const fileInput = document.getElementById('playerPhotoFile');
+  const file = fileInput.files && fileInput.files[0];
+  const status = document.getElementById('playerStatus');
+
+  if (!joueurId) {
+    status.textContent = 'Aucun joueur sélectionné.';
+    status.className = 'status error';
+    return;
+  }
+
+  if (!nom) {
+    status.textContent = 'Le nom du joueur est obligatoire.';
+    status.className = 'status error';
+    return;
+  }
+
+  try {
+    status.textContent = 'Sauvegarde en cours...';
+    status.className = 'status';
+
+    let photoBase64 = '';
+    let photoMimeType = '';
+
+    if (file) {
+      photoBase64 = await readFileAsDataURL(file);
+      photoMimeType = safeText(file.type).trim() || 'image/jpeg';
+    }
+
+    const response = await fetch(API_BASE, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: 'updatePlayer',
+        joueur_id: joueurId,
+        nom: nom,
+        photo_drive: photoDrive,
+        photo_base64: photoBase64,
+        photo_mime_type: photoMimeType
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data || !data.ok || !data.joueur) {
+      throw new Error((data && data.error) || 'Réponse updatePlayer invalide.');
+    }
+
+    const updated = data.joueur;
+
+    const idx = allPlayers.findIndex(p => safeText(p.joueur_id) === safeText(updated.joueur_id));
+    if (idx >= 0) {
+      allPlayers[idx] = updated;
+    }
+
+    filterPlayers();
+    openPlayer(updated.joueur_id);
+
+    status.textContent = file
+      ? 'Joueur et photo sauvegardés avec succès.'
+      : 'Joueur sauvegardé avec succès.';
+    status.className = 'status ok';
+  } catch (error) {
+    console.error(error);
+    status.textContent = 'Erreur lors de la sauvegarde.';
+    status.className = 'status error';
+  }
+}
+
+function getPlayerIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return safeText(params.get('joueur_id')).trim();
+}
+    
+    async function loadPlayers() {
+      try {
+        const response = await fetch(API_BASE + '?action=getPlayers&includeInactive=0');
+        const data = await response.json();
+
+        if (!data || !data.ok || !Array.isArray(data.data)) {
+          throw new Error('Réponse joueurs invalide.');
+        }
+
+        allPlayers = data.data
+          .slice()
+          .sort((a, b) => safeText(a.nom).localeCompare(safeText(b.nom), 'fr', { sensitivity: 'base' }));
+
+        filteredPlayers = allPlayers.slice();
+        renderPlayersList(filteredPlayers);
+        const playerIdFromUrl = getPlayerIdFromUrl();
+if (playerIdFromUrl) {
+  const playerExists = allPlayers.some(
+    p => safeText(p.joueur_id).trim() === playerIdFromUrl
+  );
+
+  if (playerExists) {
+    openPlayer(playerIdFromUrl);
+  }
+}
+      } catch (error) {
+        console.error(error);
+        document.getElementById('playersList').innerHTML =
+          '<div class="empty-box">Erreur de chargement des joueurs.</div>';
+      }
+    }
+
+    document.getElementById('playerSearch').addEventListener('input', filterPlayers);
+    document.getElementById('playerPhotoDrive').addEventListener('input', refreshPhotoPreview);
+    document.getElementById('playerPhotoFile').addEventListener('change', refreshPhotoPreview);
+    document.getElementById('backToListBtn').addEventListener('click', closePlayer);
+    document.getElementById('savePlayerBtn').addEventListener('click', savePlayer);
+    
+    loadPlayers();
+  </script>
+</body>
+</html>
