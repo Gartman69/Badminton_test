@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Badminton Stats - Configuration de la saison</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success-bg: #ecfdf5;
+      --success-line: #a7f3d0;
+      --soft: #eff6ff;
+      --soft-line: #bfdbfe;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .topbar p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 22px;
+    }
+
+    .card p {
+      margin-top: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font: inherit;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .players-list-title,
+    .tuesdays-title {
+      margin: 18px 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .players-list,
+    .tuesdays-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-item,
+    .tuesday-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fafafa;
+      width: 100%;
+      min-height: 68px;
+    }
+
+    .player-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      flex: 0 0 auto;
+    }
+
+    .player-name,
+    .tuesday-name {
+      font-weight: bold;
+    }
+
+    .player-code,
+    .tuesday-code {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .summary-box {
+      background: var(--success-bg);
+      border: 1px solid var(--success-line);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+    }
+
+    .summary-value {
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .preview-box {
+      margin-top: 20px;
+      padding: 18px;
+      border: 1px solid var(--soft-line);
+      border-radius: 14px;
+      background: var(--soft);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .season-management {
+      margin-bottom: 20px;
+    }
+
+    .active-season-card {
+      border: 1px solid #a7f3d0;
+      background: #ecfdf5;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .active-season-card.empty {
+      border-color: var(--line);
+      background: #fafafa;
+    }
+
+    .season-history {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .history-main {
+      min-width: 0;
+    }
+
+    .history-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .history-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .status-pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .status-pill.active {
+      color: #047857;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+    }
+
+    .status-pill.closed {
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+    }
+
+    .btn.danger {
+      background: #fff;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .btn.danger:hover {
+      background: #fef2f2;
+    }
+
+    .creation-locked {
+      opacity: 0.58;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .config-message {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--soft);
+      border: 1px solid var(--soft-line);
+      color: #1e3a8a;
+      line-height: 1.45;
+    }
+
+    .season-roster {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .season-roster-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .season-roster-head h3 {
+      margin: 0 0 4px;
+    }
+
+    .season-roster-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .roster-count {
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .roster-list {
+      max-height: 360px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .roster-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+    }
+
+    .roster-player:last-child {
+      border-bottom: none;
+    }
+
+    .roster-player:hover {
+      background: #f8fafc;
+    }
+
+    .roster-player input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    .roster-player-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .roster-player-name {
+      font-weight: bold;
+    }
+
+    .roster-player-id {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .roster-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .roster-empty {
+      padding: 16px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Configuration de la saison</h1>
+      </div>
+      <a class="btn secondary" href="index.html">← Retour à l'accueil</a>
+    </div>
+
+    <section class="card season-management">
+      <h2>Gestion des saisons</h2>
+      <p>La saison active est modifiable. Les saisons terminées restent consultables, mais elles sont verrouillées en lecture seule.</p>
+
+      <div class="active-season-card empty" id="activeSeasonCard">
+        <div class="history-name" id="activeSeasonName">Chargement de la saison active...</div>
+        <div class="history-meta" id="activeSeasonMeta">Connexion à la base en cours.</div>
+
+        <div class="season-roster" id="activeSeasonRoster" style="display:none;">
+          <div class="season-roster-head">
+            <div>
+              <h3>Joueurs de la saison active</h3>
+              <p>Décoche un joueur pour le retirer des prochaines présences. Son historique reste intact.</p>
+            </div>
+            <div class="roster-count" id="activeRosterCount">0 joueur</div>
+          </div>
+
+          <div class="field" style="margin-bottom:10px;">
+            <label for="activeRosterSearch">Rechercher un joueur</label>
+            <input id="activeRosterSearch" type="search" placeholder="Nom ou identifiant" />
+          </div>
+
+          <div class="roster-list" id="activeRosterList">
+            <div class="roster-empty">Chargement des joueurs...</div>
+          </div>
+
+          <div class="roster-actions">
+            <button type="button" class="btn secondary" id="addActivePlayerBtn">+ Ajouter un joueur</button>
+            <button type="button" class="btn secondary" id="selectAllRosterBtn">Tout sélectionner</button>
+            <button type="button" class="btn secondary" id="clearRosterBtn">Tout décocher</button>
+            <button type="button" class="btn primary" id="saveRosterBtn">Enregistrer les joueurs</button>
+          </div>
+        </div>
+
+        <div class="actions" id="activeSeasonActions" style="display:none;">
+          <button type="button" class="btn danger" id="closeSeasonBtn">Clôturer la saison active</button>
+        </div>
+      </div>
+
+      <div class="config-message" id="creationMessage">
+        Vérification de la saison active...
+      </div>
+
+      <div class="section-title">Historique</div>
+      <div class="season-history" id="seasonHistory">
+        <div class="history-item">
+          <div class="history-main">
+            <div class="history-name">Chargement des saisons...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card" id="newSeasonSection">
+        <h2>Préparer une nouvelle saison</h2>
+
+        <form id="seasonSetupForm">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="nomSaison">Nom de la saison</label>
+              <input type="text" id="nomSaison" name="nomSaison" placeholder="Ex. Fin de saison 2026" />
+            </div>
+
+            <div class="field">
+              <label for="dateDebut">Date de début</label>
+              <input type="date" id="dateDebut" name="dateDebut" />
+            </div>
+
+            <div class="field">
+              <label for="dateFin">Date de fin</label>
+              <input type="date" id="dateFin" name="dateFin" />
+            </div>
+
+            <div class="field full">
+              <label for="notesSaison">Notes</label>
+              <textarea id="notesSaison" name="notesSaison" placeholder="Notes optionnelles pour la saison..."></textarea>
+            </div>
+          </div>
+
+          <div class="preview-box">
+            <div class="tuesdays-title">Mardis générés</div>
+            <div class="tuesdays-list" id="tuesdaysList">
+              <div class="tuesday-item">
+                <div>
+                  <div class="tuesday-name">Aucun mardi généré pour l’instant</div>
+                  <div class="tuesday-code">Choisis une date de début et une date de fin</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Joueurs à inclure</div>
+
+          <div class="toolbar">
+            <button type="button" class="btn secondary" id="selectAllPlayers">Tout sélectionner</button>
+            <button type="button" class="btn secondary" id="clearAllPlayers">Tout retirer</button>
+            <button type="button" class="btn secondary" id="addPlayerBtn">Ajouter un joueur</button>
+            <button type="button" class="btn secondary" id="removePlayerBtn">Retirer un joueur</button>
+          </div>
+
+          <div class="players-list-title">Liste des joueurs de la saison</div>
+
+          <div class="players-list" id="playersList">
+            <div class="player-item">
+              <div>
+                <div class="player-name">Chargement des joueurs...</div>
+                <div class="player-code">Connexion à la base en cours</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn" id="createSeasonBtn">Créer la saison</button>
+            <button type="reset" class="btn secondary" id="resetSeasonBtn">Réinitialiser</button>
+          </div>
+
+        </form>
+      </section>
+
+      <aside class="card">
+        <h2>Résumé</h2>
+
+        <div class="summary-box">
+          <h3>Saison en préparation</h3>
+
+          <div class="summary-row">
+            <div class="summary-label">Nom</div>
+            <div class="summary-value" id="summaryName">—</div>
+          </div>
+
+          <div class="summary-row">
+            <div class="summary-label">Début</div>
+            <div class="summary-value" id="summaryStart">—</div>
+          </div>
+
+          <div class="summary-row">
+            <div class="summary-label">Fin</div>
+            <div class="summary-value" id="summaryEnd">—</div>
+          </div>
+
+          <div class="summary-row">
+            <div class="summary-label">Mardis générés</div>
+            <div class="summary-value" id="summaryTuesdays">0</div>
+          </div>
+
+          <div class="summary-row">
+            <div class="summary-label">Joueurs sélectionnés</div>
+            <div class="summary-value" id="summaryPlayers">0</div>
+          </div>
+        </div>
+
+        <div class="section-title">Fonctionnement</div>
+        <p>
+          Une seule saison peut être active à la fois. Lorsqu’une saison est clôturée, son classement final est archivé et toutes ses données deviennent en lecture seule. Une nouvelle saison peut ensuite être préparée ici.
+        </p>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwddJ7s8j6uWH2fXP_h7161F_MT5ZU12X15oMx6Xx7icxud1jg9_e3iq28bjfs3X4_y/exec';
+
+    const seasonSetupForm = document.getElementById('seasonSetupForm');
+    const createSeasonBtn = document.getElementById('createSeasonBtn');
+    const notesSaisonEl = document.getElementById('notesSaison');
+    const nomSaisonEl = document.getElementById('nomSaison');
+    const dateDebutEl = document.getElementById('dateDebut');
+    const dateFinEl = document.getElementById('dateFin');
+    const playersListEl = document.getElementById('playersList');
+    const tuesdaysListEl = document.getElementById('tuesdaysList');
+    const selectAllBtn = document.getElementById('selectAllPlayers');
+    const clearAllBtn = document.getElementById('clearAllPlayers');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const removePlayerBtn = document.getElementById('removePlayerBtn');
+    const resetSeasonBtn = document.getElementById('resetSeasonBtn');
+
+    const activeSeasonCardEl = document.getElementById('activeSeasonCard');
+    const activeSeasonNameEl = document.getElementById('activeSeasonName');
+    const activeSeasonMetaEl = document.getElementById('activeSeasonMeta');
+    const activeSeasonActionsEl = document.getElementById('activeSeasonActions');
+    const closeSeasonBtn = document.getElementById('closeSeasonBtn');
+    const activeSeasonRosterEl = document.getElementById('activeSeasonRoster');
+    const activeRosterCountEl = document.getElementById('activeRosterCount');
+    const activeRosterSearchEl = document.getElementById('activeRosterSearch');
+    const activeRosterListEl = document.getElementById('activeRosterList');
+    const addActivePlayerBtn = document.getElementById('addActivePlayerBtn');
+    const selectAllRosterBtn = document.getElementById('selectAllRosterBtn');
+    const clearRosterBtn = document.getElementById('clearRosterBtn');
+    const saveRosterBtn = document.getElementById('saveRosterBtn');
+    const creationMessageEl = document.getElementById('creationMessage');
+    const seasonHistoryEl = document.getElementById('seasonHistory');
+    const newSeasonSectionEl = document.getElementById('newSeasonSection');
+
+    const summaryNameEl = document.getElementById('summaryName');
+    const summaryStartEl = document.getElementById('summaryStart');
+    const summaryEndEl = document.getElementById('summaryEnd');
+    const summaryTuesdaysEl = document.getElementById('summaryTuesdays');
+    const summaryPlayersEl = document.getElementById('summaryPlayers');
+
+    let seasonsCache = [];
+    let activeSeason = null;
+    let allPlayersCache = [];
+    let activeRosterIds = new Set();
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatDateForDisplay(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr + 'T00:00:00');
+      return date.toLocaleDateString('fr-CA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function generateTuesdays(startStr, endStr) {
+      if (!startStr || !endStr) return [];
+
+      const start = new Date(startStr + 'T00:00:00');
+      const end = new Date(endStr + 'T00:00:00');
+
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+        return [];
+      }
+
+      const current = new Date(start);
+      while (current.getDay() !== 2) {
+        current.setDate(current.getDate() + 1);
+      }
+
+      const results = [];
+      let noSession = 1;
+
+      while (current <= end) {
+        results.push({
+          noSession,
+          date: new Date(current)
+        });
+        current.setDate(current.getDate() + 7);
+        noSession += 1;
+      }
+
+      return results;
+    }
+
+    function renderTuesdays() {
+      const tuesdays = generateTuesdays(dateDebutEl.value, dateFinEl.value);
+
+      summaryStartEl.textContent = formatDateForDisplay(dateDebutEl.value);
+      summaryEndEl.textContent = formatDateForDisplay(dateFinEl.value);
+      summaryTuesdaysEl.textContent = tuesdays.length;
+
+      if (!dateDebutEl.value || !dateFinEl.value) {
+        tuesdaysListEl.innerHTML = `
+          <div class="tuesday-item">
+            <div>
+              <div class="tuesday-name">Aucun mardi généré pour l’instant</div>
+              <div class="tuesday-code">Choisis une date de début et une date de fin</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (tuesdays.length === 0) {
+        tuesdaysListEl.innerHTML = `
+          <div class="tuesday-item">
+            <div>
+              <div class="tuesday-name">Aucun mardi trouvé</div>
+              <div class="tuesday-code">Vérifie les dates choisies</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      tuesdaysListEl.innerHTML = tuesdays.map(item => `
+        <div class="tuesday-item">
+          <div>
+            <div class="tuesday-name">Session ${item.noSession}</div>
+            <div class="tuesday-code">${item.date.toLocaleDateString('fr-CA', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSelectedPlayersCount() {
+      const checked = document.querySelectorAll('input[name="playerSelection"]:checked').length;
+      summaryPlayersEl.textContent = checked;
+    }
+
+    function updateSummaryName() {
+      const value = nomSaisonEl.value.trim();
+      summaryNameEl.textContent = value || '—';
+    }
+
+    function bindPlayerEvents() {
+      const checkboxes = document.querySelectorAll('input[name="playerSelection"]');
+
+      checkboxes.forEach(box => {
+        box.addEventListener('change', updateSelectedPlayersCount);
+      });
+
+      selectAllBtn.addEventListener('click', () => {
+        checkboxes.forEach(box => {
+          box.checked = true;
+        });
+        updateSelectedPlayersCount();
+      });
+
+      clearAllBtn.addEventListener('click', () => {
+        checkboxes.forEach(box => {
+          box.checked = false;
+        });
+        updateSelectedPlayersCount();
+      });
+    }
+
+    function normalizeStatus(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function formatShortDate(value) {
+      if (!value) return '—';
+
+      const date = new Date(String(value).slice(0, 10) + 'T00:00:00');
+      if (Number.isNaN(date.getTime())) return String(value);
+
+      return date.toLocaleDateString('fr-CA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function isActiveSeason(season) {
+      return normalizeStatus(season?.statut) === 'active';
+    }
+
+    function isClosedSeason(season) {
+      const status = normalizeStatus(season?.statut);
+      return status === 'terminee' || status === 'terminée';
+    }
+
+    function getPlayerId(player) {
+      return String(player?.joueur_id || player?.id || '').trim();
+    }
+
+    function getPlayerName(player) {
+      return String(player?.nom || player?.name || getPlayerId(player)).trim();
+    }
+
+    function renderActiveRoster() {
+      if (!activeSeason) {
+        activeSeasonRosterEl.style.display = 'none';
+        return;
+      }
+
+      activeSeasonRosterEl.style.display = 'block';
+
+      const search = String(activeRosterSearchEl.value || '').trim().toLowerCase();
+
+      const players = allPlayersCache
+        .filter(player => {
+          const id = getPlayerId(player);
+          const name = getPlayerName(player);
+          if (!id) return false;
+
+          if (!search) return true;
+
+          return `${name} ${id}`.toLowerCase().includes(search);
+        })
+        .sort((a, b) =>
+          getPlayerName(a).localeCompare(getPlayerName(b), 'fr', {
+            sensitivity: 'base'
+          })
+        );
+
+      if (!players.length) {
+        activeRosterListEl.innerHTML =
+          '<div class="roster-empty">Aucun joueur trouvé.</div>';
+      } else {
+        activeRosterListEl.innerHTML = players.map(player => {
+          const id = getPlayerId(player);
+          const name = getPlayerName(player);
+          const checked = activeRosterIds.has(id) ? 'checked' : '';
+
+          return `
+            <label class="roster-player">
+              <input
+                type="checkbox"
+                class="active-roster-checkbox"
+                value="${escapeHtml(id)}"
+                ${checked}
+              />
+              <div class="roster-player-main">
+                <div class="roster-player-name">${escapeHtml(name)}</div>
+                <div class="roster-player-id">${escapeHtml(id)}</div>
+              </div>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const count = activeRosterIds.size;
+      activeRosterCountEl.textContent =
+        `${count} joueur${count === 1 ? '' : 's'}`;
+    }
+
+    function syncRosterFromVisibleCheckboxes() {
+      document
+        .querySelectorAll('.active-roster-checkbox')
+        .forEach(input => {
+          const id = String(input.value || '').trim();
+          if (!id) return;
+
+          if (input.checked) {
+            activeRosterIds.add(id);
+          } else {
+            activeRosterIds.delete(id);
+          }
+        });
+
+      const count = activeRosterIds.size;
+      activeRosterCountEl.textContent =
+        `${count} joueur${count === 1 ? '' : 's'}`;
+    }
+
+    async function addPlayerToActiveSeason() {
+      if (!activeSeason || !activeSeason.saison_id) {
+        alert('Aucune saison active.');
+        return;
+      }
+
+      const nom = prompt('Nom du nouveau joueur :');
+
+      if (!nom || !nom.trim()) {
+        return;
+      }
+
+      addActivePlayerBtn.disabled = true;
+      addActivePlayerBtn.textContent = 'Ajout...';
+
+      try {
+        // Étape 1 : créer le joueur dans la base générale
+        const addResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'addPlayer',
+            nom: nom.trim()
+          })
+        });
+
+        const addResult = await addResponse.json();
+
+        if (!addResult.ok) {
+          throw new Error(addResult.error || 'Erreur lors de la création du joueur.');
+        }
+
+        const newPlayerId = String(
+          addResult.joueur?.joueur_id ||
+          addResult.joueur_id ||
+          ''
+        ).trim();
+
+        if (!newPlayerId) {
+          throw new Error('Le nouveau joueur a été créé, mais son identifiant est introuvable.');
+        }
+
+        // Étape 2 : ajouter immédiatement le joueur au roster de la saison active
+        const nextRoster = new Set(activeRosterIds);
+        nextRoster.add(newPlayerId);
+
+        const rosterResponse = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'updateSeasonPlayers',
+            saison_id: activeSeason.saison_id,
+            joueurs: [...nextRoster]
+          })
+        });
+
+        const rosterResult = await rosterResponse.json();
+
+        if (!rosterResult.ok) {
+          throw new Error(
+            rosterResult.error ||
+            'Le joueur a été créé, mais impossible de l’ajouter à la saison.'
+          );
+        }
+
+        activeRosterIds = nextRoster;
+
+        // Recharge les joueurs et la saison pour refléter la nouvelle donnée
+        await loadPlayers();
+        await loadSeasons();
+
+        alert(`Joueur ajouté à la saison : ${nom.trim()}`);
+      } catch (error) {
+        console.error(error);
+        alert('Erreur lors de l’ajout du joueur : ' + (error.message || error));
+      } finally {
+        addActivePlayerBtn.disabled = false;
+        addActivePlayerBtn.textContent = '+ Ajouter un joueur';
+      }
+    }
+
+    async function saveActiveRoster() {
+      if (!activeSeason || !activeSeason.saison_id) {
+        alert('Aucune saison active.');
+        return;
+      }
+
+      syncRosterFromVisibleCheckboxes();
+
+      const previousIds = new Set(
+        Array.isArray(activeSeason.joueurs)
+          ? activeSeason.joueurs.map(value => String(value || '').trim()).filter(Boolean)
+          : []
+      );
+
+      const removed = [...previousIds].filter(id => !activeRosterIds.has(id));
+
+      if (removed.length) {
+        const removedNames = removed
+          .map(id => {
+            const player = allPlayersCache.find(item => getPlayerId(item) === id);
+            return player ? getPlayerName(player) : id;
+          })
+          .join(', ');
+
+        const confirmed = confirm(
+          `Retirer ${removed.length} joueur(s) de la saison active ?\n\n` +
+          `${removedNames}\n\n` +
+          `Leur historique et leurs matchs déjà joués seront conservés. ` +
+          `Ils ne feront simplement plus partie des prochaines présences.`
+        );
+
+        if (!confirmed) {
+          return;
+        }
+      }
+
+      saveRosterBtn.disabled = true;
+      saveRosterBtn.textContent = 'Enregistrement...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'updateSeasonPlayers',
+            saison_id: activeSeason.saison_id,
+            joueurs: [...activeRosterIds]
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || 'Erreur API inconnue');
+        }
+
+        alert(
+          `${result.nb_joueurs} joueur(s) enregistré(s) dans la saison active.`
+        );
+
+        await loadSeasons();
+      } catch (error) {
+        console.error(error);
+        alert(
+          'Erreur lors de la mise à jour des joueurs : ' +
+          (error.message || error)
+        );
+      } finally {
+        saveRosterBtn.disabled = false;
+        saveRosterBtn.textContent = 'Enregistrer les joueurs';
+      }
+    }
+
+    function renderSeasonManagement() {
+      activeSeason = seasonsCache.find(isActiveSeason) || null;
+
+      if (activeSeason) {
+        activeRosterIds = new Set(
+          Array.isArray(activeSeason.joueurs)
+            ? activeSeason.joueurs
+                .map(value => String(value || '').trim())
+                .filter(Boolean)
+            : []
+        );
+
+        activeSeasonCardEl.classList.remove('empty');
+        activeSeasonNameEl.textContent =
+          activeSeason.nom_saison || activeSeason.saison_id || 'Saison active';
+
+        activeSeasonMetaEl.textContent =
+          `${formatShortDate(activeSeason.date_debut)} → ${formatShortDate(activeSeason.date_fin)} • ` +
+          `${Array.isArray(activeSeason.sessions) ? activeSeason.sessions.length : 0} sessions`;
+
+        activeSeasonActionsEl.style.display = 'flex';
+        renderActiveRoster();
+
+        creationMessageEl.textContent =
+          'Une saison est déjà active. La création d’une nouvelle saison est désactivée pour éviter d’avoir deux saisons actives en même temps.';
+
+        newSeasonSectionEl.classList.add('creation-locked');
+        createSeasonBtn.disabled = true;
+      } else {
+        activeSeasonCardEl.classList.add('empty');
+        activeSeasonNameEl.textContent = 'Aucune saison active';
+        activeSeasonMetaEl.textContent =
+          'Tu peux préparer et créer une nouvelle saison avec le formulaire ci-dessous.';
+
+        activeSeasonActionsEl.style.display = 'none';
+        activeSeasonRosterEl.style.display = 'none';
+        activeRosterIds = new Set();
+
+        creationMessageEl.textContent =
+          'Aucune saison active : le formulaire de création est disponible.';
+
+        newSeasonSectionEl.classList.remove('creation-locked');
+        createSeasonBtn.disabled = false;
+      }
+
+      const history = seasonsCache.filter(season => !isActiveSeason(season));
+
+      if (!history.length) {
+        seasonHistoryEl.innerHTML = `
+          <div class="history-item">
+            <div class="history-main">
+              <div class="history-name">Aucune saison terminée</div>
+              <div class="history-meta">L’historique apparaîtra ici après la première clôture.</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      seasonHistoryEl.innerHTML = history.map(season => {
+        const status = isClosedSeason(season) ? 'Terminée' : (season.statut || 'Historique');
+
+        return `
+          <div class="history-item">
+            <div class="history-main">
+              <div class="history-name">${escapeHtml(season.nom_saison || season.saison_id)}</div>
+              <div class="history-meta">
+                ${escapeHtml(formatShortDate(season.date_debut))}
+                →
+                ${escapeHtml(formatShortDate(season.date_fin))}
+                •
+                ${escapeHtml(Array.isArray(season.sessions) ? season.sessions.length : 0)} sessions
+              </div>
+            </div>
+            <span class="status-pill closed">${escapeHtml(status)}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadSeasons() {
+      try {
+        const response = await fetch(`${API_URL}?action=getSeasons`);
+        const result = await response.json();
+
+        if (!result.ok || !Array.isArray(result.data)) {
+          throw new Error(result.error || 'Réponse API invalide');
+        }
+
+        seasonsCache = result.data;
+        renderSeasonManagement();
+      } catch (error) {
+        console.error('Erreur loadSeasons:', error);
+
+        activeSeasonCardEl.classList.add('empty');
+        activeSeasonNameEl.textContent = 'Erreur de chargement';
+        activeSeasonMetaEl.textContent = error.message || String(error);
+
+        creationMessageEl.textContent =
+          'Impossible de déterminer la saison active. La création est bloquée par sécurité.';
+
+        newSeasonSectionEl.classList.add('creation-locked');
+        createSeasonBtn.disabled = true;
+      }
+    }
+
+    async function closeActiveSeason() {
+      if (!activeSeason || !activeSeason.saison_id) {
+        alert('Aucune saison active à clôturer.');
+        return;
+      }
+
+      const seasonName = activeSeason.nom_saison || activeSeason.saison_id;
+
+      const confirmed = confirm(
+        `Clôturer définitivement "${seasonName}" ?\n\n` +
+        `Le classement final sera archivé et cette saison deviendra en lecture seule.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      closeSeasonBtn.disabled = true;
+      closeSeasonBtn.textContent = 'Clôture...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify({
+            action: 'closeSeason',
+            saison_id: activeSeason.saison_id
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || 'Erreur API inconnue');
+        }
+
+        alert(`Saison clôturée : ${seasonName}`);
+        await loadSeasons();
+      } catch (error) {
+        console.error(error);
+        alert('Erreur lors de la clôture : ' + (error.message || error));
+      } finally {
+        closeSeasonBtn.disabled = false;
+        closeSeasonBtn.textContent = 'Clôturer la saison active';
+      }
+    }
+
+    async function loadPlayers() {
+      try {
+        const response = await fetch(`${API_URL}?action=getPlayers`);
+        const result = await response.json();
+
+        if (!result.ok || !Array.isArray(result.data)) {
+          playersListEl.innerHTML = `
+            <div class="player-item">
+              <div>
+                <div class="player-name">Erreur de chargement</div>
+                <div class="player-code">${escapeHtml(result.error || 'Réponse API invalide')}</div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        const players = result.data;
+      allPlayersCache = Array.isArray(players) ? players : [];
+      renderActiveRoster();
+
+console.log('players API =', players);
+console.log('premier joueur =', players[0]);
+console.log('ids joueurs =', players.map(p => p.player_id));
+
+        if (players.length === 0) {
+          playersListEl.innerHTML = `
+            <div class="player-item">
+              <div>
+                <div class="player-name">Aucun joueur trouvé</div>
+                <div class="player-code">La base ne contient aucun joueur pour l'instant</div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        playersListEl.innerHTML = players.map(player => {
+          const playerId = escapeHtml(player.joueur_id || player.player_id || '');
+          const playerName = escapeHtml(player.nom || 'Sans nom');
+
+          return `
+            <label class="player-item">
+              <input type="checkbox" name="playerSelection" value="${playerId}" />
+              <div>
+                <div class="player-name">${playerName}</div>
+                <div class="player-code">${playerId}</div>
+              </div>
+            </label>
+          `;
+        }).join('');
+
+        bindPlayerEvents();
+        updateSelectedPlayersCount();
+      } catch (error) {
+        playersListEl.innerHTML = `
+          <div class="player-item">
+            <div>
+              <div class="player-name">Erreur fetch</div>
+              <div class="player-code">${escapeHtml(error.message || error)}</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    closeSeasonBtn.addEventListener('click', closeActiveSeason);
+    addActivePlayerBtn.addEventListener('click', addPlayerToActiveSeason);
+    saveRosterBtn.addEventListener('click', saveActiveRoster);
+
+    activeRosterSearchEl.addEventListener('input', () => {
+      syncRosterFromVisibleCheckboxes();
+      renderActiveRoster();
+    });
+
+    activeRosterListEl.addEventListener('change', event => {
+      if (!event.target.classList.contains('active-roster-checkbox')) {
+        return;
+      }
+
+      const id = String(event.target.value || '').trim();
+      if (!id) return;
+
+      if (event.target.checked) {
+        activeRosterIds.add(id);
+      } else {
+        activeRosterIds.delete(id);
+      }
+
+      const count = activeRosterIds.size;
+      activeRosterCountEl.textContent =
+        `${count} joueur${count === 1 ? '' : 's'}`;
+    });
+
+    selectAllRosterBtn.addEventListener('click', () => {
+      allPlayersCache.forEach(player => {
+        const id = getPlayerId(player);
+        if (id) activeRosterIds.add(id);
+      });
+      renderActiveRoster();
+    });
+
+    clearRosterBtn.addEventListener('click', () => {
+      activeRosterIds = new Set();
+      renderActiveRoster();
+    });
+
+    nomSaisonEl.addEventListener('input', updateSummaryName);
+    dateDebutEl.addEventListener('change', renderTuesdays);
+    dateFinEl.addEventListener('change', renderTuesdays);
+
+addPlayerBtn.addEventListener('click', async () => {
+  const nom = prompt('Nom du nouveau joueur :');
+
+  if (!nom || !nom.trim()) {
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: 'addPlayer',
+        nom: nom.trim()
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    await loadPlayers();
+    alert(`Joueur ajouté : ${nom.trim()}`);
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors de l’ajout : ' + (error.message || error));
+  }
+});
+
+removePlayerBtn.addEventListener('click', async () => {
+  const selected = Array.from(
+    document.querySelectorAll('input[name="playerSelection"]:checked')
+  );
+
+  if (selected.length !== 1) {
+    alert('Coche un seul joueur à retirer.');
+    return;
+  }
+
+  const joueurId = selected[0].value;
+  const rowEl = selected[0].closest('label');
+  const joueurName =
+    rowEl?.querySelector('.player-name')?.textContent?.trim() || joueurId;
+  const joueurCode =
+    rowEl?.querySelector('.player-code')?.textContent?.trim() || joueurId;
+
+  const ok = confirm(`Retirer ce joueur de la liste active ?\n\n${joueurName} (${joueurCode})`);
+  if (!ok) {
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: 'removePlayer',
+        joueur_id: joueurId,
+        player_id: joueurId,
+        id: joueurId,
+        nom: joueurName
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    await loadPlayers();
+    alert(`Joueur retiré : ${joueurName}`);
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors du retrait : ' + (error.message || error));
+  }
+});
+
+    resetSeasonBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        updateSummaryName();
+        renderTuesdays();
+        const checkboxes = document.querySelectorAll('input[name="playerSelection"]');
+        checkboxes.forEach(box => {
+          box.checked = false;
+        });
+        updateSelectedPlayersCount();
+      }, 0);
+    });
+function buildSeasonPayload() {
+  const selectedPlayers = Array.from(
+    document.querySelectorAll('input[name="playerSelection"]:checked')
+  ).map(box => box.value);
+
+  const sessions = generateTuesdays(dateDebutEl.value, dateFinEl.value).map(item => ({
+    no_session: item.noSession,
+    date: item.date.toISOString().slice(0, 10)
+  }));
+
+  return {
+    nom_saison: nomSaisonEl.value.trim(),
+    date_debut: dateDebutEl.value,
+    date_fin: dateFinEl.value,
+    notes: notesSaisonEl.value.trim(),
+    joueurs: selectedPlayers,
+    sessions
+  };
+}
+
+seasonSetupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const payload = buildSeasonPayload();
+
+  if (!payload.nom_saison) {
+    alert('Entre un nom de saison.');
+    return;
+  }
+
+  if (!payload.date_debut || !payload.date_fin) {
+    alert('Choisis une date de début et une date de fin.');
+    return;
+  }
+
+  if (payload.sessions.length === 0) {
+    alert('Aucune session du mardi n’a été générée.');
+    return;
+  }
+
+  if (payload.joueurs.length === 0) {
+    alert('Sélectionne au moins un joueur.');
+    return;
+  }
+
+  createSeasonBtn.disabled = true;
+  createSeasonBtn.textContent = 'Sauvegarde...';
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: 'createSeason',
+        ...payload
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.ok) {
+      throw new Error(result.error || 'Erreur API inconnue');
+    }
+
+    alert('Saison sauvegardée avec succès.');
+    console.log('Résultat createSeason :', result);
+    await loadSeasons();
+  } catch (error) {
+    console.error(error);
+    alert('Erreur lors de la sauvegarde : ' + (error.message || error));
+  } finally {
+    createSeasonBtn.disabled = false;
+    createSeasonBtn.textContent = 'Créer la saison';
+  }
+});
+    updateSummaryName();
+    renderTuesdays();
+    loadPlayers();
+    loadSeasons();
+  </script>
+</body>
+</html>
