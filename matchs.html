@@ -486,6 +486,7 @@
             <button type="button" class="btn ghost" id="prevRoundBtn">Tour précédent</button>
             <button type="button" class="btn ghost" id="nextRoundBtn">Tour suivant</button>
             <button type="button" class="btn secondary" id="copyPrevRoundBtn">Prochain à jouer</button>
+            <button type="button" class="btn secondary" id="refreshMatchBtn">🔄 Actualiser</button>
             <button type="button" class="btn secondary" id="clearWithdrawalsBtn">Annuler retraits</button>
             <button type="button" class="btn" id="finalizeSessionBtn">Terminer + barrer</button>
           </div>
@@ -571,6 +572,7 @@
     const prevRoundBtn = document.getElementById('prevRoundBtn');
     const nextRoundBtn = document.getElementById('nextRoundBtn');
     const copyPrevRoundBtn = document.getElementById('copyPrevRoundBtn');
+    const refreshMatchBtn = document.getElementById('refreshMatchBtn');
     const clearWithdrawalsBtn = document.getElementById('clearWithdrawalsBtn');
     const finalizeSessionBtn = document.getElementById('finalizeSessionBtn');
     const lockSessionToggle = document.getElementById('lockSessionToggle');
@@ -1822,11 +1824,15 @@ function applySessionLockUI() {
         input.dataset.groupCode
       ).trim().toUpperCase();
 
-      const activeLock = getActiveMatchLock(
-        stageNo,
-        matchNo,
-        groupCode
-      );
+const state = getCachedRoundGroupState(
+  stageNo,
+  groupCode
+);
+
+const canScore =
+  safeText(state?.etat).trim().toUpperCase() === 'EN_JEU' &&
+  safeText(state?.match_no_en_cours).trim() ===
+    safeText(matchNo).trim();
 
       const match = getRenderedMatchForPosition(
         stageNo,
@@ -1839,12 +1845,12 @@ function applySessionLockUI() {
         safeText(match?.team1_score).trim() !== '' &&
         safeText(match?.team2_score).trim() !== '';
 
-      input.disabled =
-        !hasSession ||
-        matchControlsBaseDisabled ||
-        sessionLocked ||
-        !activeLock ||
-        saved;
+input.disabled =
+  !hasSession ||
+  matchControlsBaseDisabled ||
+  sessionLocked ||
+  !canScore ||
+  saved;
     });
 
   // SAUVEGARDER :
@@ -1858,11 +1864,15 @@ function applySessionLockUI() {
         button.dataset.groupCode
       ).trim().toUpperCase();
 
-      const activeLock = getActiveMatchLock(
-        stageNo,
-        matchNo,
-        groupCode
-      );
+const state = getCachedRoundGroupState(
+  stageNo,
+  groupCode
+);
+
+const canSave =
+  safeText(state?.etat).trim().toUpperCase() === 'EN_JEU' &&
+  safeText(state?.match_no_en_cours).trim() ===
+    safeText(matchNo).trim();
 
       const match = getRenderedMatchForPosition(
         stageNo,
@@ -1875,12 +1885,12 @@ function applySessionLockUI() {
         safeText(match?.team1_score).trim() !== '' &&
         safeText(match?.team2_score).trim() !== '';
 
-      button.disabled =
-        !hasSession ||
-        matchControlsBaseDisabled ||
-        sessionLocked ||
-        !activeLock ||
-        saved;
+button.disabled =
+  !hasSession ||
+  matchControlsBaseDisabled ||
+  sessionLocked ||
+  !canSave ||
+  saved;
     });
 
   // COMMENCER À JOUER
@@ -1915,27 +1925,32 @@ function applySessionLockUI() {
         safeText(match?.team1_score).trim() !== '' &&
         safeText(match?.team2_score).trim() !== '';
 
-      const playingElsewhere =
-        state?.etat === 'EN_JEU' &&
-        !activeLock;
+const sameMatchAlreadyPlaying =
+  safeText(state?.etat).trim().toUpperCase() === 'EN_JEU' &&
+  safeText(state?.match_no_en_cours).trim() ===
+    safeText(matchNo).trim();
 
-      button.disabled =
-        !hasSession ||
-        matchControlsBaseDisabled ||
-        sessionLocked ||
-        saved ||
-        !!activeLock ||
-        playingElsewhere;
+const anotherMatchPlaying =
+  safeText(state?.etat).trim().toUpperCase() === 'EN_JEU' &&
+  !sameMatchAlreadyPlaying;
 
-      if (saved) {
-        button.textContent = 'Sauvegardé';
-      } else if (activeLock) {
-        button.textContent = 'Match en cours';
-      } else if (playingElsewhere) {
-        button.textContent = 'En jeu sur un autre appareil';
-      } else {
-        button.textContent = 'Commencer à jouer';
-      }
+button.disabled =
+  !hasSession ||
+  matchControlsBaseDisabled ||
+  sessionLocked ||
+  saved ||
+  sameMatchAlreadyPlaying ||
+  anotherMatchPlaying;
+
+if (saved) {
+  button.textContent = 'Sauvegardé';
+} else if (sameMatchAlreadyPlaying) {
+  button.textContent = 'Match en cours';
+} else if (anotherMatchPlaying) {
+  button.textContent = 'Autre match en cours';
+} else {
+  button.textContent = 'Commencer à jouer';
+}
     });
 }
 
@@ -2816,25 +2831,33 @@ const groupModel = (roundPlan.groups || []).find(group =>
   safeText(group.group_code).trim().toUpperCase() === cleanGroupCode
 ) || null;
       if (!match) throw new Error(`Groupe ${cleanGroupCode} introuvable pour cet écran.`);
-const activeLock = getActiveMatchLock(
+const state = getCachedRoundGroupState(
   stageNo,
-  matchNo,
   cleanGroupCode
 );
 
-if (!activeLock) {
+if (!state) {
   throw new Error(
-    `Le groupe ${cleanGroupCode} doit cliquer sur "Commencer à jouer" avant de sauvegarder.`
+    `État serveur introuvable pour le groupe ${cleanGroupCode}. Actualise la page.`
   );
 }
 
-if (!safeText(activeLock.lock_id).trim()) {
+if (safeText(state.etat).trim().toUpperCase() !== 'EN_JEU') {
   throw new Error(
-    `lock_id manquant pour le groupe ${cleanGroupCode}.`
+    `Le groupe ${cleanGroupCode} n'est pas actuellement EN_JEU.`
   );
 }
 
-if (!Number(activeLock.composition_version || 0)) {
+if (
+  safeText(state.match_no_en_cours).trim() !==
+  safeText(matchNo).trim()
+) {
+  throw new Error(
+    `Le groupe ${cleanGroupCode} joue actuellement un autre match.`
+  );
+}
+
+if (!Number(state.composition_version || 0)) {
   throw new Error(
     `Version de composition manquante pour le groupe ${cleanGroupCode}.`
   );
@@ -2851,9 +2874,8 @@ return {
   match_no: matchNo,
   group_code: cleanGroupCode,
 
-  lock_id: safeText(activeLock.lock_id).trim(),
-  composition_version:
-    Number(activeLock.composition_version || 0),
+composition_version:
+  Number(state.composition_version || 0),
 team1_player1_id: buildStoredPlayerRefFromDisplayedGroup(match.team1_player1, groupModel),
 team1_player2_id: buildStoredPlayerRefFromDisplayedGroup(match.team1_player2, groupModel),
 team2_player1_id: buildStoredPlayerRefFromDisplayedGroup(match.team2_player1, groupModel),
@@ -2927,16 +2949,7 @@ async function startCurrentGroupMatch(groupCode, stageNo = currentStageNo, match
     return;
   }
 
-  const existingLock = getActiveMatchLock(
-    stageNo,
-    matchNo,
-    cleanGroupCode
-  );
 
-  if (existingLock) {
-    alert(`Le groupe ${cleanGroupCode} a déjà commencé ce match sur cet appareil.`);
-    return;
-  }
 
   try {
     // 1. Lire la version officielle du serveur
@@ -3057,14 +3070,7 @@ async function startCurrentGroupMatch(groupCode, stageNo = currentStageNo, match
       );
     }
 
-    // 4. Le lock_id reste seulement sur CE téléphone.
-    activeMatchLocks[
-      getMatchLockKey(stageNo, matchNo, cleanGroupCode)
-    ] = {
-      lock_id: safeText(result.lock_id).trim(),
-      composition_version:
-        Number(result.composition_version || 0)
-    };
+
 
 roundGroupStates[
   getRoundGroupStateKey(stageNo, cleanGroupCode)
@@ -3074,7 +3080,8 @@ roundGroupStates[
   composition_version:
     Number(result.composition_version || 0),
   etat: 'EN_JEU',
-  match_no_en_cours: String(matchNo),
+match_no_en_cours:
+  safeText(result.match_no || matchNo).trim(),
   started_at: result.started_at || ''
 };
 
@@ -3280,7 +3287,10 @@ alert(
       renderedMatchMap = {};
       resetStageWithdrawals();
       resetStageManualOrders();
-      setMatchControlsDisabled(true);
+// Nouvelle session / nouveau chargement :
+// on oublie les anciens états locaux et on relit le serveur.
+roundGroupStates = {};
+activeMatchLocks = {};
 
       if (!saisonId || !noSession || !dateSession) {
         renderRound();
@@ -3331,6 +3341,18 @@ alert(
         rankingCache = Array.isArray(rankingResult.rows) ? rankingResult.rows : [];
         rankingSeasonId = saisonId;
 
+// Relit les états officiels de tous les rounds.
+// C'est ce qui permet à un autre téléphone de récupérer
+// automatiquement un groupe déjà EN_JEU.
+for (let roundNo = 1; roundNo <= MAX_ROUNDS; roundNo += 1) {
+  await refreshRoundGroupStatesFromServer(roundNo);
+}
+
+// Réapplique les compositions/tags officiels du serveur.
+for (let roundNo = 1; roundNo <= MAX_ROUNDS; roundNo += 1) {
+  applyOfficialRoundStatesToStage(roundNo);
+}
+        
         const sessionMeta = getSelectedSessionMeta();
         sessionLocked = !!sessionMeta?.barree;
         lockSessionToggle.checked = sessionLocked;
@@ -3453,7 +3475,45 @@ alert(
       renderRound();
       alert(`Le prochain match à jouer est : round ${currentStageNo}, match ${currentMatchNo}.`);
     });
+refreshMatchBtn.addEventListener('click', async () => {
+  const savedStageNo = currentStageNo;
+  const savedMatchNo = currentMatchNo;
+  const savedGroupViewPositions = {
+    ...groupViewPositions
+  };
 
+  try {
+    refreshMatchBtn.disabled = true;
+    refreshMatchBtn.textContent = '🔄 Actualisation...';
+
+    // Recharge présences, matchs sauvegardés
+    // et états officiels EN_JEU / FIGE.
+    await loadSessionContext({
+      jumpToNextPlayable: false
+    });
+
+    // On revient exactement où l'utilisateur était.
+    currentStageNo = savedStageNo;
+    currentMatchNo = savedMatchNo;
+    groupViewPositions = savedGroupViewPositions;
+
+    currentRoundPlan = null;
+    renderedMatchMap = {};
+
+    renderRound();
+
+  } catch (error) {
+    console.error(error);
+    alert(
+      'Erreur lors de l’actualisation : ' +
+      (error.message || error)
+    );
+  } finally {
+    refreshMatchBtn.disabled = false;
+    refreshMatchBtn.textContent = '🔄 Actualiser';
+    applySessionLockUI();
+  }
+});
     lockSessionToggle.addEventListener('change', async () => {
       const wantedState = !!lockSessionToggle.checked;
       const previousState = sessionLocked;
