@@ -2035,12 +2035,12 @@ cumulativeRankingCache = [];
       preparationSource = safeText(built.source).trim();
 
       if (proposalGroups.length) {
-        if (currentRound1AlreadyExists) {
-          setHint(
-            `Round 1 existe déjà en base pour cette session. La page affiche quand même la proposition théorique basée sur ${logicalPositionsSource || 'les positions logiques globales'}.`,
-            'warn'
-          );
-          savePrepBtn.disabled = true;
+if (currentRound1AlreadyExists) {
+  setHint(
+    `Round 1 sauvegardé. Cette session est maintenant prête pour la page Matchs.`,
+    'ok'
+  );
+  savePrepBtn.disabled = true;
         } else {
           setHint(
             previousSessionNoCache
