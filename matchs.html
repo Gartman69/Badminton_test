@@ -3155,7 +3155,17 @@ if (liveMatch && groupModel) {
     groupModel
   );
 
-  upsertSavedMatchInCache(normalizedSavedMatch);
+upsertSavedMatchInCache(normalizedSavedMatch);
+
+// Le match affiché doit immédiatement devenir
+// la version officiellement sauvegardée.
+renderedMatchMap[
+  getMatchStateKey(
+    currentStageNo,
+    currentMatchNo,
+    groupCode
+  )
+] = normalizedSavedMatch;
 }
 
 // Ce lock a servi. On le détruit sur CE téléphone.
