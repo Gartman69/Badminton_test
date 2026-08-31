@@ -736,19 +736,19 @@ hero {
       return null;
     }
 
-    function getSeasonPointsSummary(season, global) {
-      const pointsFor = pickStat(season, ['pointsFor', 'points_pour', 'pf', 'points_for']);
-      const pointsAgainst = pickStat(season, ['pointsAgainst', 'points_contre', 'pc', 'points_against']);
-      const pointDiff = pickStat(season, ['pointDiff', 'plus_moins', 'differentiel', 'diff']);
-      const matches = pickStat(season, ['matches', 'matchs', 'matchs_joues']);
+function getSeasonPointsSummary(season) {
+  const pointsFor = pickStat(season, ['pointsFor', 'points_pour', 'pf', 'points_for']);
+  const pointsAgainst = pickStat(season, ['pointsAgainst', 'points_contre', 'pc', 'points_against']);
+  const pointDiff = pickStat(season, ['pointDiff', 'plus_moins', 'differentiel', 'diff']);
+  const matches = pickStat(season, ['matches', 'matchs', 'matchs_joues']);
 
-      return {
-        pointsFor: pointsFor ?? global.pointsFor ?? 0,
-        pointsAgainst: pointsAgainst ?? global.pointsAgainst ?? 0,
-        pointDiff: pointDiff ?? global.pointDiff ?? 0,
-        matches: matches ?? global.matches ?? 0
-      };
-    }
+  return {
+    pointsFor: pointsFor ?? 0,
+    pointsAgainst: pointsAgainst ?? 0,
+    pointDiff: pointDiff ?? 0,
+    matches: matches ?? 0
+  };
+}
 
     function formatPartnerStat(item, primaryKey, suffix) {
       if (!item || !item.name) return '—';
@@ -836,7 +836,7 @@ hero {
         const season = stats.season || {};
         const relations = stats.relationships || {};
         const records = stats.records || {};
-        const seasonPoints = getSeasonPointsSummary(season, global);
+       const seasonPoints = getSeasonPointsSummary(season);
 
         setStatValue('statSeasonWins', season.wins ?? 0);
         setStatValue('statSeasonMatches', season.matches ?? 0);
