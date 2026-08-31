@@ -2444,6 +2444,78 @@ function buildRoundPlan(stageNo, matchNo) {
       return cloneStageMatchPosition(positions[positions.length - 1]);
     }
 
+function getNextLaggingGroupToPlay() {
+  const candidates = [];
+
+  getStageOneGroupCodes().forEach(groupCode => {
+    const positions = getAvailablePositionsForGroup(groupCode);
+
+    if (!positions.length) return;
+
+    let savedCount = 0;
+    let nextPosition = null;
+
+    positions.forEach(position => {
+      const savedMatch = getSavedMatchForGroupPosition(
+        groupCode,
+        position.stage_no,
+        position.match_no
+      );
+
+      const isSaved = !!(
+        savedMatch &&
+        safeText(savedMatch.match_id).trim() &&
+        safeText(savedMatch.team1_score).trim() !== '' &&
+        safeText(savedMatch.team2_score).trim() !== ''
+      );
+
+      if (isSaved) {
+        savedCount += 1;
+      } else if (!nextPosition) {
+        nextPosition = cloneStageMatchPosition(position);
+      }
+    });
+
+    // Groupe complètement terminé :
+    // il n'est plus candidat.
+    if (!nextPosition) return;
+
+    candidates.push({
+      group_code: safeText(groupCode).trim().toUpperCase(),
+      saved_count: savedCount,
+      total_matches: positions.length,
+      next_position: nextPosition
+    });
+  });
+
+  if (!candidates.length) {
+    return null;
+  }
+
+  // Priorité :
+  // 1. groupe avec le moins de matchs sauvegardés
+  // 2. round le plus bas
+  // 3. match le plus bas
+  // 4. ordre A, B, C, D, E
+  candidates.sort((a, b) => {
+    if (a.saved_count !== b.saved_count) {
+      return a.saved_count - b.saved_count;
+    }
+
+    if (a.next_position.stage_no !== b.next_position.stage_no) {
+      return a.next_position.stage_no - b.next_position.stage_no;
+    }
+
+    if (a.next_position.match_no !== b.next_position.match_no) {
+      return a.next_position.match_no - b.next_position.match_no;
+    }
+
+    return getGroupIndex(a.group_code) - getGroupIndex(b.group_code);
+  });
+
+  return candidates[0];
+}
+    
     function ensureGroupViewPositions() {
       const nextPositions = {};
       getStageOneGroupCodes().forEach(groupCode => {
@@ -3478,13 +3550,75 @@ for (let roundNo = 1; roundNo <= MAX_ROUNDS; roundNo += 1) {
       renderRound();
     });
 
-    copyPrevRoundBtn.addEventListener('click', () => {
-      const nextPlayable = getNextPlayablePosition();
-      currentStageNo = nextPlayable.stage_no;
-      currentMatchNo = nextPlayable.match_no;
-      renderRound();
-      alert(`Le prochain match à jouer est : round ${currentStageNo}, match ${currentMatchNo}.`);
+copyPrevRoundBtn.addEventListener('click', async () => {
+  try {
+    copyPrevRoundBtn.disabled = true;
+    copyPrevRoundBtn.textContent = '🔄 Vérification...';
+
+    // 1. Relire la vérité serveur :
+    // scores sauvegardés + états des groupes.
+    await loadSessionContext({
+      jumpToNextPlayable: false
     });
+
+    // 2. Trouver le groupe réellement le plus en retard.
+    const next = getNextLaggingGroupToPlay();
+
+    if (!next) {
+      alert('Tous les matchs de tous les groupes sont sauvegardés.');
+      return;
+    }
+
+    const groupCode = next.group_code;
+    const position = next.next_position;
+
+    // 3. Amener CE groupe exactement
+    // sur son prochain match à jouer.
+    setGroupViewPosition(
+      groupCode,
+      position
+    );
+
+    currentStageNo = position.stage_no;
+    currentMatchNo = position.match_no;
+
+    renderedMatchMap = {};
+    currentRoundPlan = null;
+
+    renderRound();
+
+    // 4. Amener visuellement le groupe à l'écran.
+    const card = groupsGridEl.querySelector(
+      `[data-group-card="${groupCode}"]`
+    );
+
+    if (card) {
+      card.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+
+    alert(
+      `Prochain à jouer : Groupe ${groupCode}\n` +
+      `Round ${position.stage_no} • Match ${position.match_no}\n` +
+      `${next.saved_count} match(s) sauvegardé(s) sur ${next.total_matches}.`
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      'Impossible de déterminer le prochain groupe : ' +
+      (error.message || error)
+    );
+
+  } finally {
+    copyPrevRoundBtn.disabled = false;
+    copyPrevRoundBtn.textContent = 'Prochain à jouer';
+    applySessionLockUI();
+  }
+});
 refreshMatchBtn.addEventListener('click', async () => {
   const savedStageNo = currentStageNo;
   const savedMatchNo = currentMatchNo;
