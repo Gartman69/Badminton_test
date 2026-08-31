@@ -499,7 +499,7 @@ hero {
                     <div id="statSeasonMatches" class="stat-value">—</div>
                   </div>
                   <div class="stat-row">
-                    <div class="stat-label">Victoires global</div>
+                   <div class="stat-label">Présences</div>
                     <div id="statGlobalWins" class="stat-value">—</div>
                   </div>
                   <div class="stat-row">
@@ -834,15 +834,14 @@ hero {
 
         const stats = data.stats;
         const season = stats.season || {};
-        const global = stats.global || {};
         const relations = stats.relationships || {};
         const records = stats.records || {};
         const seasonPoints = getSeasonPointsSummary(season, global);
 
         setStatValue('statSeasonWins', season.wins ?? 0);
         setStatValue('statSeasonMatches', season.matches ?? 0);
-        setStatValue('statGlobalWins', global.wins ?? 0);
-        setStatValue('statWinRate', formatPercent(global.winRate ?? 0));
+setStatValue('statGlobalWins', season.presences ?? 0);
+setStatValue('statWinRate', formatPercent(season.winRate ?? 0));
         setStatValue('statPointsFor', seasonPoints.pointsFor);
         setStatValue('statPointsAgainst', seasonPoints.pointsAgainst);
         setStatValue('statPointDiff', formatSigned(seasonPoints.pointDiff));
