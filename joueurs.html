@@ -858,14 +858,25 @@ setStatValue('statWinRate', formatPercent(season.winRate ?? 0));
         const intro = document.getElementById('statsIntroText');
         const badge = document.getElementById('statsBadge');
 
-        if (intro) {
-          const seasonName = safeText(stats.seasonName).trim();
-          const globalMatches = Number(global.matches || 0);
-          const presenceCount = Number(season.presences || 0);
-          intro.textContent = seasonName
-            ? (seasonName + ' • ' + globalMatches + ' matchs analysés au total • ' + presenceCount + ' présences cette saison')
-            : (globalMatches + ' matchs analysés au total');
-        }
+if (intro) {
+  const seasonName = safeText(stats.seasonName).trim();
+  const seasonMatches = Number(season.matches || 0);
+  const presenceCount = Number(season.presences || 0);
+
+  intro.textContent = seasonName
+    ? (
+        seasonName +
+        ' • ' +
+        seasonMatches +
+        ' matchs cette saison • ' +
+        presenceCount +
+        ' présences'
+      )
+    : (
+        seasonMatches +
+        ' matchs cette saison'
+      );
+}
 
         if (badge) {
           badge.textContent = stats.seasonName ? ('Saison active • ' + stats.seasonName) : 'Stats à jour';
