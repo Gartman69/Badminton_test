@@ -72,6 +72,8 @@
     .player-tools .danger{color:#fff;background:var(--danger);border-color:var(--danger)}
     .player-tools .danger:hover{background:#8f281d;border-color:#8f281d}
     .player-tools .active-action{background:#e9f1ff;border-color:#8eb2ff;color:#184ea5}
+    .inline-player-tools-row td{padding:0 5px 8px;background:#fff5c7}
+    .inline-player-tools{margin:0}
     .cancelled-row td{background:#f7f7f7;color:#8a918d}
     .cancelled-label{font-weight:800;color:#8a5a00}
     .match-no{width:48px;text-align:center;font-weight:800}
@@ -150,7 +152,7 @@
   <section id="round2" class="round" hidden>
     <div class="round-head">
       <div class="round-title"><h2>Série 2</h2><span id="round2Status" class="pill">À venir</span></div>
-      <div class="round-note">Référence officielle pour la prochaine session · clique sur un joueur à gauche pour le déplacer ou le retirer.</div>
+      <div class="round-note">Clique sur un joueur à gauche pour le déplacer ou le retirer.</div>
     </div>
     <div id="round2PlayerTools" class="player-tools" hidden></div>
     <div id="round2Groups" class="groups"></div>
@@ -159,11 +161,11 @@
   <section id="round3" class="round" hidden>
   <div class="round-head">
     <div class="round-title">
-      <h2>Série 3 · Bonus</h2>
+      <h2>Série 3</h2>
       <span id="round3Status" class="pill">À venir</span>
     </div>
     <div class="round-note">
-      Série bonus : elle compte dans les statistiques, mais ne change pas l’ordre de départ de la prochaine session.
+      Référence officielle pour l’ordre de départ de la prochaine session.
     </div>
   </div>
 
@@ -359,6 +361,7 @@ function computeGroupStats(group,round=null){
   (group.players || []).forEach((p,index)=>{
     stats[idOf(p)] = {
       joueur_id:idOf(p), nom:nameOf(p), start_index:index,
+      position_logique:p.position_logique ?? '',
       matchs_joues:0, victoires:0, defaites:0,
       points_pour:0, points_contre:0, plus_moins:0, rang:''
     };
@@ -388,8 +391,15 @@ function computeGroupStats(group,round=null){
 
   const ranked = Object.values(stats).sort((a,b)=>{
     if (b.plus_moins !== a.plus_moins) return b.plus_moins - a.plus_moins;
-    if (b.points_pour !== a.points_pour) return b.points_pour - a.points_pour;
-    if (a.points_contre !== b.points_contre) return a.points_contre - b.points_contre;
+
+    // Égalité de +/- : le Global # chargé au début de cette session tranche.
+    const ga = clean(a.position_logique) === '' ? Number.POSITIVE_INFINITY : Number(a.position_logique);
+    const gb = clean(b.position_logique) === '' ? Number.POSITIVE_INFINITY : Number(b.position_logique);
+    const globalA = Number.isFinite(ga) ? ga : Number.POSITIVE_INFINITY;
+    const globalB = Number.isFinite(gb) ? gb : Number.POSITIVE_INFINITY;
+    if (globalA !== globalB) return globalA - globalB;
+
+    // Filet de sécurité seulement si le Global est absent ou identique.
     return a.nom.localeCompare(b.nom,'fr',{sensitivity:'base'});
   });
   ranked.forEach((x,i)=>x.rang=i+1);
@@ -711,21 +721,23 @@ function cascadePlayer(roundNo,sourceId,targetId){
   finishRosterChange(roundNo,`${sourceName} a été déplacé en cascade à la position de ${targetName} dans la Série ${roundNo}.`);
 }
 
-function renderPlayerTools(roundNo){
-  const box=$('round'+roundNo+'PlayerTools');
-  if(!box)return;
-  const active=playerEdit.roundNo===String(roundNo) && playerEdit.sourceId;
-  if(!active){box.hidden=true;box.innerHTML='';return;}
-  const loc=findPlayerLocation(roundNo,playerEdit.sourceId);
-  if(!loc){box.hidden=true;box.innerHTML='';return;}
-  box.hidden=false;
+function playerToolsHtml(roundNo,playerId){
+  const loc=findPlayerLocation(roundNo,playerId);
+  if(!loc)return '';
   const label=`${nameOf(loc.player)} · Groupe ${loc.group.group_code} · position ${loc.playerIndex+1}`;
   if(playerEdit.mode==='switch' || playerEdit.mode==='cascade'){
     const verb=playerEdit.mode==='switch'?'Switch':'Cascade';
-    box.innerHTML=`<strong>${esc(verb)} : ${esc(label)}</strong><span class="tool-note">Clique maintenant sur le joueur cible dans n’importe quel groupe de cette série.</span><button data-player-cancel>Annuler</button>`;
-    return;
+    return `<strong>${esc(verb)} : ${esc(label)}</strong><span class="tool-note">Clique maintenant sur le joueur cible dans n’importe quel groupe de cette série.</span><button data-player-cancel>Annuler</button>`;
   }
-  box.innerHTML=`<strong>${esc(label)}</strong><span class="tool-note">Choisis l’action. Les matchs déjà commencés ne seront pas modifiés.</span><button class="danger" data-player-action="remove">Retirer</button><button data-player-action="switch">Switch</button><button data-player-action="cascade">Cascade</button><button data-player-cancel>Annuler</button>`;
+  return `<strong>${esc(label)}</strong><span class="tool-note">Choisis l’action. Les matchs déjà commencés ne seront pas modifiés.</span><button class="danger" data-player-action="remove">Retirer</button><button data-player-action="switch">Switch</button><button data-player-action="cascade">Cascade</button><button data-player-cancel>Annuler</button>`;
+}
+
+function renderPlayerTools(roundNo){
+  // Les outils sont maintenant affichés directement sous le joueur sélectionné.
+  const box=$('round'+roundNo+'PlayerTools');
+  if(!box)return;
+  box.hidden=true;
+  box.innerHTML='';
 }
 
 function sameMatchComposition(a,b){
@@ -891,7 +903,7 @@ function hydrateServerState(setup, remote){
 function sourceLabel(){
   if(!state)return '—';
   if(Number(state.no_session)===1)return state.source_ordre || 'Classement final de la saison précédente';
-  return 'Ordre logique issu de la Série 2 précédente';
+  return 'Ordre logique issu de la Série 3 précédente';
 }
 
 function playerRowHtml(player,index,computed,complete,roundNo,groupCode){
@@ -901,7 +913,10 @@ function playerRowHtml(player,index,computed,complete,roundNo,groupCode){
   const selected=playerEdit.roundNo===String(roundNo) && playerEdit.sourceId===idOf(player);
   const targetMode=playerEdit.roundNo===String(roundNo) && !!playerEdit.mode && !selected;
   const classes=['player-row','is-clickable',selected?'is-selected':'',targetMode?'is-target-mode':''].filter(Boolean).join(' ');
-  return `<tr class="${classes}" data-player="${esc(idOf(player))}" data-player-pick="1" data-round="${esc(roundNo)}" data-group="${esc(groupCode)}" title="Cliquer pour déplacer ou retirer"><td class="pos">${index+1}</td><td><span class="player-name">${esc(nameOf(player))}</span>${gp?`<span class="global-pos">${gp}</span>`:''}</td><td class="num" data-stat="diff">${st.plus_moins>0?'+':''}${st.plus_moins}</td><td class="rank" data-stat="rank">${rank}</td></tr>`;
+  const row=`<tr class="${classes}" data-player="${esc(idOf(player))}" data-player-pick="1" data-round="${esc(roundNo)}" data-group="${esc(groupCode)}" title="Cliquer pour déplacer ou retirer"><td class="pos">${index+1}</td><td><span class="player-name">${esc(nameOf(player))}</span>${gp?`<span class="global-pos">${gp}</span>`:''}</td><td class="num" data-stat="diff">${st.plus_moins>0?'+':''}${st.plus_moins}</td><td class="rank" data-stat="rank">${rank}</td></tr>`;
+  if(!selected)return row;
+  const tools=playerToolsHtml(roundNo,idOf(player));
+  return row+`<tr class="inline-player-tools-row"><td colspan="4"><div class="player-tools inline-player-tools">${tools}</div></td></tr>`;
 }
 
 function teamHtml(a,b){return `<span>${esc(nameOf(a))}</span><span>${esc(nameOf(b))}</span>`;}
@@ -1075,7 +1090,7 @@ async function saveSession(){
   try{
     const result=await apiPost('saveSessionResults',{saison_id:state.saison_id,no_session:state.no_session,matches});
     state.saved_to_server=true;state.server_result=result;saveLocal();renderAll();
-    setMessage(`Session ${state.no_session} enregistrée : ${result.nb_matchs} matchs. La Série 2 devient la référence de la prochaine session.`);
+    setMessage(`Session ${state.no_session} enregistrée : ${result.nb_matchs} matchs. La Série 3 devient la référence de la prochaine session.`);
   }catch(error){
     saveLocal();setMessage('Échec de l’enregistrement. Rien n’est perdu sur ce téléphone : '+error.message,'error');
   }finally{loading=false;refreshSaveState();}
