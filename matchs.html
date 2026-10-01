@@ -814,7 +814,7 @@ function flattenMatches(){
     const round=state?.rounds?.[roundNo];
     const pushMatch=(match,groupCode,courtNo)=>{
       if(match.cancelled)return;
-      const ref=p=>p?{joueur_id:idOf(p),tag:clean(p.tag)}:'';
+      const ref=p=>p?{joueur_id:idOf(p),tag:clean(p.tag),position_logique:p.position_logique||''}:'';
       out.push({
         round_no:roundNo,
         match_no:match.match_no,
